@@ -32,13 +32,13 @@
             this.buttonTopSide = new System.Windows.Forms.Button();
             this.buttonLeftSide = new System.Windows.Forms.Button();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.buttonTarget = new System.Windows.Forms.Button();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.textBoxOrigin = new System.Windows.Forms.TextBox();
             this.textBoxTopSide = new System.Windows.Forms.TextBox();
+            this.textBoxTarget = new System.Windows.Forms.TextBox();
             this.textBoxLeftSide = new System.Windows.Forms.TextBox();
             this.labelConstraint = new System.Windows.Forms.Label();
-            this.buttonTarget = new System.Windows.Forms.Button();
-            this.textBoxTarget = new System.Windows.Forms.TextBox();
             this.labelDescription = new System.Windows.Forms.Label();
             this.buttonMakeLattice = new System.Windows.Forms.Button();
             this.textBoxMakeLattice = new System.Windows.Forms.TextBox();
@@ -53,8 +53,8 @@
             this.radioButtonCL = new System.Windows.Forms.RadioButton();
             this.radioButtonBL = new System.Windows.Forms.RadioButton();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.radioButtonVIsometry = new System.Windows.Forms.RadioButton();
             this.radioButtonVRatio = new System.Windows.Forms.RadioButton();
+            this.radioButtonVIsometry = new System.Windows.Forms.RadioButton();
             this.panel2 = new System.Windows.Forms.Panel();
             this.radioButtonHRatio = new System.Windows.Forms.RadioButton();
             this.radioButtonHIsometry = new System.Windows.Forms.RadioButton();
@@ -78,6 +78,7 @@
             this.buttonOrigin.TabIndex = 0;
             this.buttonOrigin.Text = "起点を取得";
             this.buttonOrigin.UseVisualStyleBackColor = true;
+            this.buttonOrigin.Click += new System.EventHandler(this.buttonOrigin_Click);
             // 
             // buttonTopSide
             // 
@@ -89,6 +90,7 @@
             this.buttonTopSide.TabIndex = 0;
             this.buttonTopSide.Text = "上辺を取得";
             this.buttonTopSide.UseVisualStyleBackColor = true;
+            this.buttonTopSide.Click += new System.EventHandler(this.buttonTopSide_Click);
             // 
             // buttonLeftSide
             // 
@@ -99,6 +101,7 @@
             this.buttonLeftSide.TabIndex = 0;
             this.buttonLeftSide.Text = "左辺を取得";
             this.buttonLeftSide.UseVisualStyleBackColor = true;
+            this.buttonLeftSide.Click += new System.EventHandler(this.buttonLeftSide_Click);
             // 
             // tableLayoutPanel1
             // 
@@ -117,6 +120,17 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 75F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(429, 161);
             this.tableLayoutPanel1.TabIndex = 1;
+            // 
+            // buttonTarget
+            // 
+            this.buttonTarget.Location = new System.Drawing.Point(113, 47);
+            this.buttonTarget.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.buttonTarget.Name = "buttonTarget";
+            this.buttonTarget.Size = new System.Drawing.Size(310, 107);
+            this.buttonTarget.TabIndex = 0;
+            this.buttonTarget.Text = "整列対象を取得";
+            this.buttonTarget.UseVisualStyleBackColor = true;
+            this.buttonTarget.Click += new System.EventHandler(this.buttonTarget_Click);
             // 
             // tableLayoutPanel2
             // 
@@ -158,6 +172,17 @@
             this.textBoxTopSide.TabIndex = 1;
             this.textBoxTopSide.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
+            // textBoxTarget
+            // 
+            this.textBoxTarget.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.textBoxTarget.Location = new System.Drawing.Point(113, 45);
+            this.textBoxTarget.Multiline = true;
+            this.textBoxTarget.Name = "textBoxTarget";
+            this.textBoxTarget.ReadOnly = true;
+            this.textBoxTarget.Size = new System.Drawing.Size(315, 111);
+            this.textBoxTarget.TabIndex = 1;
+            this.textBoxTarget.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
             // textBoxLeftSide
             // 
             this.textBoxLeftSide.Anchor = System.Windows.Forms.AnchorStyles.None;
@@ -178,27 +203,6 @@
             this.labelConstraint.TabIndex = 1;
             this.labelConstraint.Text = "前提\r\n・上辺と下辺の点数が同じである\r\n・左辺と右辺の点数が同じである\r\n・起点から辺を確定するとき前方に1次近接点が2つ以上存在しない　";
             // 
-            // buttonTarget
-            // 
-            this.buttonTarget.Location = new System.Drawing.Point(113, 47);
-            this.buttonTarget.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.buttonTarget.Name = "buttonTarget";
-            this.buttonTarget.Size = new System.Drawing.Size(310, 107);
-            this.buttonTarget.TabIndex = 0;
-            this.buttonTarget.Text = "整列対象を取得";
-            this.buttonTarget.UseVisualStyleBackColor = true;
-            // 
-            // textBoxTarget
-            // 
-            this.textBoxTarget.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.textBoxTarget.Location = new System.Drawing.Point(113, 45);
-            this.textBoxTarget.Multiline = true;
-            this.textBoxTarget.Name = "textBoxTarget";
-            this.textBoxTarget.ReadOnly = true;
-            this.textBoxTarget.Size = new System.Drawing.Size(315, 111);
-            this.textBoxTarget.TabIndex = 1;
-            this.textBoxTarget.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
             // labelDescription
             // 
             this.labelDescription.AutoSize = true;
@@ -207,8 +211,8 @@
             this.labelDescription.Name = "labelDescription";
             this.labelDescription.Size = new System.Drawing.Size(433, 82);
             this.labelDescription.TabIndex = 2;
-            this.labelDescription.Text = "1. UV格子生成の起点となる頂点を選択する\r\n2. UV格子の上辺・左辺となる頂点群を選択する\r\n3. UV格子を当てはめる頂点群を選択する\r\n頂点が複数回選択" +
-    "された場合、数字が小さい手順の選択が優先される\r\n";
+            this.labelDescription.Text = "1. UV格子生成の起点となる格子左上頂点を選択する\r\n2. UV格子の上辺・左辺となる頂点群を選択する\r\n3. UV格子を当てはめる頂点群を選択する\r\n頂点が複" +
+    "数回選択された場合、数字が小さい手順の選択が優先される\r\n";
             // 
             // buttonMakeLattice
             // 
@@ -218,6 +222,7 @@
             this.buttonMakeLattice.TabIndex = 3;
             this.buttonMakeLattice.Text = "格子を生成";
             this.buttonMakeLattice.UseVisualStyleBackColor = true;
+            this.buttonMakeLattice.Click += new System.EventHandler(this.buttonMakeLattice_Click);
             // 
             // textBoxMakeLattice
             // 
@@ -363,18 +368,6 @@
             this.panel1.Size = new System.Drawing.Size(164, 33);
             this.panel1.TabIndex = 5;
             // 
-            // radioButtonVIsometry
-            // 
-            this.radioButtonVIsometry.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.radioButtonVIsometry.AutoSize = true;
-            this.radioButtonVIsometry.Location = new System.Drawing.Point(3, 4);
-            this.radioButtonVIsometry.Name = "radioButtonVIsometry";
-            this.radioButtonVIsometry.Size = new System.Drawing.Size(57, 24);
-            this.radioButtonVIsometry.TabIndex = 0;
-            this.radioButtonVIsometry.TabStop = true;
-            this.radioButtonVIsometry.Text = "等長";
-            this.radioButtonVIsometry.UseVisualStyleBackColor = true;
-            // 
             // radioButtonVRatio
             // 
             this.radioButtonVRatio.Anchor = System.Windows.Forms.AnchorStyles.Right;
@@ -386,6 +379,18 @@
             this.radioButtonVRatio.TabStop = true;
             this.radioButtonVRatio.Text = "比率";
             this.radioButtonVRatio.UseVisualStyleBackColor = true;
+            // 
+            // radioButtonVIsometry
+            // 
+            this.radioButtonVIsometry.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.radioButtonVIsometry.AutoSize = true;
+            this.radioButtonVIsometry.Location = new System.Drawing.Point(3, 4);
+            this.radioButtonVIsometry.Name = "radioButtonVIsometry";
+            this.radioButtonVIsometry.Size = new System.Drawing.Size(57, 24);
+            this.radioButtonVIsometry.TabIndex = 0;
+            this.radioButtonVIsometry.TabStop = true;
+            this.radioButtonVIsometry.Text = "等長";
+            this.radioButtonVIsometry.UseVisualStyleBackColor = true;
             // 
             // panel2
             // 
@@ -447,6 +452,7 @@
             this.buttonAlign.TabIndex = 3;
             this.buttonAlign.Text = "整列を実行";
             this.buttonAlign.UseVisualStyleBackColor = true;
+            this.buttonAlign.Click += new System.EventHandler(this.buttonAlign_Click);
             // 
             // CtrlForm
             // 
