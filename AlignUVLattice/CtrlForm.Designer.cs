@@ -417,11 +417,12 @@
             // 
             this.labelalign.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.labelalign.AutoSize = true;
-            this.labelalign.Location = new System.Drawing.Point(221, 90);
+            this.labelalign.Location = new System.Drawing.Point(153, 70);
             this.labelalign.Name = "labelalign";
-            this.labelalign.Size = new System.Drawing.Size(99, 20);
+            this.labelalign.Size = new System.Drawing.Size(234, 60);
             this.labelalign.TabIndex = 7;
-            this.labelalign.Text = "整列基準位置";
+            this.labelalign.Text = "整列基準位置\r\n長さを揃える設定の場合は\r\nそれぞれの方向の設定値は無視される";
+            this.labelalign.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // tableLayoutPanelSetDesc
             // 

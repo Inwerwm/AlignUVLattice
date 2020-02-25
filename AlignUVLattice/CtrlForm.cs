@@ -19,6 +19,7 @@ namespace AlignUVLattice
         List<IPXVertex> targetVertices;
 
         IPXVertex[,] UVLattice;
+        int[,] UVLatticeID;
 
         bool existLattice;
 
@@ -204,6 +205,14 @@ namespace AlignUVLattice
                         forcus.x++;
                     }
                 }
+
+                for (int i = 0; i < leftSide.Count; i++)
+                {
+                    for (int j = 0; j < topSide.Count; j++)
+                    {
+                        UVLatticeID[i, j] = pmx.Vertex.IndexOf(UVLattice[i, j]);
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -225,6 +234,9 @@ namespace AlignUVLattice
             //0列目の点を基準に横方向に総距離の長さの線分を比率に沿って分割する
             //0行目であった場合、等長ならこの総距離の長さを全ての行の長さにする、比率なら基準にして他の行では長さの比率で距離を決める
             float basisSideLength = 0;
+            var HLength = new float[leftSide.Count];
+            var VLength = new float[topSide.Count];
+
             for (int i = 0; i < leftSide.Count; i++)
             {
                 float UVsideLength = 0;
@@ -248,14 +260,131 @@ namespace AlignUVLattice
                     //0列目の点を基準に横方向に総距離の長さの線分を比率に沿って分割する
                     var ratio = (UVLattice[i, j - 1].Position - UVLattice[i, j].Position).Length() / XYZsideLength;
                     UVLattice[i, j].UV.V = UVLattice[i, 0].UV.V;
-                    UVLattice[i, j].UV.U = UVLattice[i, j - 1].UV.U + UVsideLength * ratio;
+                    UVLattice[i, j].UV.U = UVLattice[i, j - 1].UV.U + (checkBoxHIsolength.Checked ? basisSideLength : UVsideLength) * ratio;
+                }
+
+                HLength[i] = UVsideLength;
+            }
+
+            //列についても同様にする
+            for (int i = 0; i < topSide.Count; i++)
+            {
+                float UVsideLength = 0;
+                float XYZsideLength = 0;
+                for (int j = 1; j < leftSide.Count; j++)
+                {
+                    //UV座標における辺の総距離を求める
+                    UVsideLength += (UVLattice[j - 1, i].UV - UVLattice[j, i].UV).Length();
+                    //位置座標における辺の総距離を求める
+                    XYZsideLength += (UVLattice[j - 1, i].Position - UVLattice[j, i].Position).Length();
+                }
+
+                if (i == 0)
+                {
+                    //0列目のUV辺総距離を基準長として保存
+                    basisSideLength = UVsideLength;
+                }
+
+                for (int j = 1; j < leftSide.Count; j++)
+                {
+                    //0行目の点を基準に横方向に総距離の長さの線分を比率に沿って分割する
+                    var ratio = (UVLattice[j - 1, i].Position - UVLattice[j, i].Position).Length() / XYZsideLength;
+                    UVLattice[j, i].UV.V = UVLattice[0, i].UV.V;
+                    UVLattice[j, i].UV.U = UVLattice[j - 1, i].UV.U + (checkBoxVIsolength.Checked ? basisSideLength : UVsideLength) * ratio;
+                }
+                VLength[i] = UVsideLength;
+            }
+
+            //整列処理
+
+            //ラジオボタンの結果を方向に分解
+            byte alH = 0;//0:左 1:中 2:右
+            if (radioButtonBL.Checked || radioButtonCL.Checked || radioButtonTL.Checked)
+                alH = 0;
+            else if (radioButtonBC.Checked || radioButtonCC.Checked || radioButtonTC.Checked)
+                alH = 1;
+            else if (radioButtonBR.Checked || radioButtonCR.Checked || radioButtonTR.Checked)
+                alH = 2;
+
+            byte alV = 0;//0:上 1:中 2:下
+            if (radioButtonTL.Checked || radioButtonTC.Checked || radioButtonTR.Checked)
+                alV = 0;
+            else if (radioButtonCL.Checked || radioButtonCC.Checked || radioButtonCR.Checked)
+                alV = 1;
+            else if (radioButtonBL.Checked || radioButtonBC.Checked || radioButtonBR.Checked)
+                alV = 2;
+
+            //整列
+            if (!checkBoxHIsolength.Checked)
+            {
+                float maxLength = HLength.Max();
+                switch (alH)
+                {
+                    case 1:
+                        for (int i = 0; i < leftSide.Count; i++)
+                        {
+                            var trans = (maxLength - HLength[i]) / 2;
+                            for (int j = 0; j < topSide.Count; j++)
+                            {
+                                UVLattice[i, j].UV += new PEPlugin.SDX.V2(trans, 0);
+                            }
+                        }
+                        break;
+                    case 2:
+                        for (int i = 0; i < leftSide.Count; i++)
+                        {
+                            var trans = maxLength - HLength[i];
+                            for (int j = 0; j < topSide.Count; j++)
+                            {
+                                UVLattice[i, j].UV += new PEPlugin.SDX.V2(trans, 0);
+                            }
+                        }
+                        break;
+                    default:
+                        break;
                 }
             }
 
-            //列について同様にする
+            if (!checkBoxVIsolength.Checked)
+            {
+                float maxLength = VLength.Max();
+                switch (alV)
+                {
+                    case 1:
+                        for (int i = 0; i < topSide.Count; i++)
+                        {
+                            var trans = (maxLength - VLength[i]) / 2;
+                            for (int j = 0; j < leftSide.Count; j++)
+                            {
+                                UVLattice[j, i].UV += new PEPlugin.SDX.V2(0, trans);
+                            }
+                        }
+                        break;
+                    case 2:
+                        for (int i = 0; i < topSide.Count; i++)
+                        {
+                            var trans = maxLength - VLength[i];
+                            for (int j = 0; j < leftSide.Count; j++)
+                            {
+                                UVLattice[j, i].UV += new PEPlugin.SDX.V2(0, trans);
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
 
-            //整列の処理
+            for (int i = 0; i < leftSide.Count; i++)
+            {
+                for (int j = 0; j < topSide.Count; j++)
+                {
+                    pmx.Vertex[UVLatticeID[i, j]] = UVLattice[i, j];
+                }
+            }
+            Methods.Update(args.Host.Connector, pmx, PmxUpdateObject.Vertex);
         }
+
 
         private void SetLatticeExistance(bool value)
         {
