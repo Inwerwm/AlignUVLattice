@@ -33,7 +33,7 @@ namespace AlignUVLattice
             leftSide = null;
             targetVertices = null;
 
-            existLattice = false;
+            SetLatticeExistance(false);
         }
 
         private void CtrlForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -52,7 +52,7 @@ namespace AlignUVLattice
             if (selectedVerticesID.Length == 1)
             {
                 origin = pmx.Vertex[selectedVerticesID[0]];
-                textBoxOrigin.Text = "起点選択済み";
+                textBoxOrigin.Text = "起点選択済";
             }
             else
                 MessageBox.Show("起点は1点のみ選択してください");
@@ -70,7 +70,7 @@ namespace AlignUVLattice
 
         private void buttonTopSide_Click(object sender, EventArgs e)
         {
-            SetLatticeExistance(true);
+            SetLatticeExistance(false);
             topSide = args.Host.Connector.View.PmxView.GetSelectedVertexIndices().Select(i => pmx.Vertex[i]).ToList();
             if (origin != null)
                 topSide.Remove(origin);
@@ -85,7 +85,7 @@ namespace AlignUVLattice
 
         private void buttonLeftSide_Click(object sender, EventArgs e)
         {
-            SetLatticeExistance(true);
+            SetLatticeExistance(false);
             leftSide = args.Host.Connector.View.PmxView.GetSelectedVertexIndices().Select(i => pmx.Vertex[i]).ToList();
             if (origin != null)
                 leftSide.Remove(origin);
@@ -100,8 +100,15 @@ namespace AlignUVLattice
 
         private void buttonTarget_Click(object sender, EventArgs e)
         {
-            SetLatticeExistance(true);
+            SetLatticeExistance(false);
             targetVertices = args.Host.Connector.View.PmxView.GetSelectedVertexIndices().Select(i => pmx.Vertex[i]).ToList();
+
+            if (origin != null)
+                targetVertices.Remove(origin);
+            if (topSide != null)
+                targetVertices.RemoveAll(v => topSide.Contains(v));
+            if (leftSide != null)
+                targetVertices.RemoveAll(v => leftSide.Contains(v));
 
             textBoxTarget.Text = targetVertices.Count.ToString();
         }
@@ -130,26 +137,27 @@ namespace AlignUVLattice
             targetVertices.RemoveAll(v => leftSide.Contains(v));
 
             //格子を形成可能な頂点数かを確認
-            if (targetVertices.Count != (topSide.Count - 1) * (leftSide.Count - 1))
+            if (targetVertices.Count != topSide.Count * (leftSide.Count))
             {
                 MessageBox.Show("対象頂点の数が上辺・左辺の頂点数から計算される数と合いません");
                 return;
             }
 
             //UV格子の作成
-            UVLattice = new IPXVertex[leftSide.Count, topSide.Count];
+            UVLattice = new IPXVertex[leftSide.Count + 1, topSide.Count + 1];
             UVLattice[0, 0] = origin;
 
             //UV格子における1次隣接点リスト
-            List<IPXVertex>[,] latticeNeighbor = new List<IPXVertex>[leftSide.Count, topSide.Count];
+            List<IPXVertex>[,] latticeNeighbor = new List<IPXVertex>[leftSide.Count + 1, topSide.Count + 1];
 
             //起点の1次隣接点
             latticeNeighbor[0, 0] = GetNeighbor(UVLattice[0, 0]);
 
             //上辺の確定
-            for (int i = 0; i < topSide.Count - 1; i++)
+            for (int i = 0; i < topSide.Count; i++)
             {
                 var dupSet = latticeNeighbor[0, i].Intersect(topSide).ToList();
+                dupSet.RemoveAll(v => UVLattice.Cast<IPXVertex>().Contains(v));
                 switch (dupSet.Count)
                 {
                     case 0:
@@ -157,6 +165,7 @@ namespace AlignUVLattice
                         return;
                     case 1:
                         UVLattice[0, i + 1] = dupSet[0];
+                        latticeNeighbor[0, i + 1] = GetNeighbor(UVLattice[0, i + 1]);
                         break;
                     default:
                         MessageBox.Show("上辺の選択頂点が不正です" + Environment.NewLine + "分岐しています");
@@ -165,9 +174,10 @@ namespace AlignUVLattice
             }
 
             //左辺の確定
-            for (int i = 0; i < leftSide.Count - 1; i++)
+            for (int i = 0; i < leftSide.Count; i++)
             {
                 var dupSet = latticeNeighbor[i, 0].Intersect(leftSide).ToList();
+                dupSet.RemoveAll(v => UVLattice.Cast<IPXVertex>().Contains(v));
                 switch (dupSet.Count)
                 {
                     case 0:
@@ -175,6 +185,7 @@ namespace AlignUVLattice
                         return;
                     case 1:
                         UVLattice[i + 1, 0] = dupSet[0];
+                        latticeNeighbor[i + 1, 0] = GetNeighbor(UVLattice[i + 1, 0]);
                         break;
                     default:
                         MessageBox.Show("左辺の選択頂点が不正です" + Environment.NewLine + "分岐しています");
@@ -194,6 +205,7 @@ namespace AlignUVLattice
                     if (candidate.Count < 1)
                         throw new Exception("格子に割り当てられる頂点が見つかりませんでした");
                     UVLattice[forcus.x, forcus.y] = GetNearestUVPoint(UVLattice[forcus.x, forcus.y - 1], candidate);
+                    latticeNeighbor[forcus.x, forcus.y] = GetNeighbor(UVLattice[forcus.x, forcus.y]);
 
                     if (forcus.x == leftSide.Count)
                     {
@@ -206,9 +218,10 @@ namespace AlignUVLattice
                     }
                 }
 
-                for (int i = 0; i < leftSide.Count; i++)
+                UVLatticeID = new int[leftSide.Count + 1, topSide.Count + 1];
+                for (int i = 0; i <= leftSide.Count; i++)
                 {
-                    for (int j = 0; j < topSide.Count; j++)
+                    for (int j = 0; j <= topSide.Count; j++)
                     {
                         UVLatticeID[i, j] = pmx.Vertex.IndexOf(UVLattice[i, j]);
                     }
@@ -220,11 +233,18 @@ namespace AlignUVLattice
                 return;
             }
 
+            MessageBox.Show("UV格子の生成が完了しました");
             SetLatticeExistance(true);
         }
 
         private void buttonAlign_Click(object sender, EventArgs e)
         {
+            if (!existLattice)
+            {
+                MessageBox.Show("UV格子が生成されていません");
+                return;
+            }
+
             //起点のUV座標を基準とする
             //各点間の距離割合は3次元座標から計算する
 
@@ -234,14 +254,14 @@ namespace AlignUVLattice
             //0列目の点を基準に横方向に総距離の長さの線分を比率に沿って分割する
             //0行目であった場合、等長ならこの総距離の長さを全ての行の長さにする、比率なら基準にして他の行では長さの比率で距離を決める
             float basisSideLength = 0;
-            var HLength = new float[leftSide.Count];
-            var VLength = new float[topSide.Count];
+            var HLength = new float[leftSide.Count + 1];
+            var VLength = new float[topSide.Count + 1];
 
-            for (int i = 0; i < leftSide.Count; i++)
+            for (int i = 0; i < leftSide.Count + 1; i++)
             {
                 float UVsideLength = 0;
                 float XYZsideLength = 0;
-                for (int j = 1; j < topSide.Count; j++)
+                for (int j = 1; j < topSide.Count + 1; j++)
                 {
                     //UV座標における辺の総距離を求める
                     UVsideLength += (UVLattice[i, j - 1].UV - UVLattice[i, j].UV).Length();
@@ -254,12 +274,16 @@ namespace AlignUVLattice
                     //0行目のUV辺総距離を基準長として保存
                     basisSideLength = UVsideLength;
                 }
-
-                for (int j = 1; j < topSide.Count; j++)
+                else
                 {
-                    //0列目の点を基準に横方向に総距離の長さの線分を比率に沿って分割する
+                    //0列目のU座標を0行0列目の点と合わせる
+                    UVLattice[i, 0].UV.U = UVLattice[0, 0].UV.U;
+                }
+
+                for (int j = 1; j < topSide.Count + 1; j++)
+                {
+                    //横方向に総距離の長さの線分を比率に沿って分割する
                     var ratio = (UVLattice[i, j - 1].Position - UVLattice[i, j].Position).Length() / XYZsideLength;
-                    UVLattice[i, j].UV.V = UVLattice[i, 0].UV.V;
                     UVLattice[i, j].UV.U = UVLattice[i, j - 1].UV.U + (checkBoxHIsolength.Checked ? basisSideLength : UVsideLength) * ratio;
                 }
 
@@ -267,11 +291,11 @@ namespace AlignUVLattice
             }
 
             //列についても同様にする
-            for (int i = 0; i < topSide.Count; i++)
+            for (int i = 0; i < topSide.Count + 1; i++)
             {
                 float UVsideLength = 0;
                 float XYZsideLength = 0;
-                for (int j = 1; j < leftSide.Count; j++)
+                for (int j = 1; j < leftSide.Count + 1; j++)
                 {
                     //UV座標における辺の総距離を求める
                     UVsideLength += (UVLattice[j - 1, i].UV - UVLattice[j, i].UV).Length();
@@ -284,19 +308,22 @@ namespace AlignUVLattice
                     //0列目のUV辺総距離を基準長として保存
                     basisSideLength = UVsideLength;
                 }
-
-                for (int j = 1; j < leftSide.Count; j++)
+                else
                 {
-                    //0行目の点を基準に横方向に総距離の長さの線分を比率に沿って分割する
+                    //0行目のV座標を0行0列目の点と合わせる
+                    UVLattice[0, i].UV.V = UVLattice[0, 0].UV.V;
+                }
+
+                for (int j = 1; j < leftSide.Count + 1; j++)
+                {
+                    //縦方向に総距離の長さの線分を比率に沿って分割する
                     var ratio = (UVLattice[j - 1, i].Position - UVLattice[j, i].Position).Length() / XYZsideLength;
-                    UVLattice[j, i].UV.V = UVLattice[0, i].UV.V;
-                    UVLattice[j, i].UV.U = UVLattice[j - 1, i].UV.U + (checkBoxVIsolength.Checked ? basisSideLength : UVsideLength) * ratio;
+                    UVLattice[j, i].UV.V = UVLattice[j - 1, i].UV.V + (checkBoxVIsolength.Checked ? basisSideLength : UVsideLength) * ratio;
                 }
                 VLength[i] = UVsideLength;
             }
 
             //整列処理
-
             //ラジオボタンの結果を方向に分解
             byte alH = 0;//0:左 1:中 2:右
             if (radioButtonBL.Checked || radioButtonCL.Checked || radioButtonTL.Checked)
@@ -321,20 +348,20 @@ namespace AlignUVLattice
                 switch (alH)
                 {
                     case 1:
-                        for (int i = 0; i < leftSide.Count; i++)
+                        for (int i = 0; i < leftSide.Count + 1; i++)
                         {
                             var trans = (maxLength - HLength[i]) / 2;
-                            for (int j = 0; j < topSide.Count; j++)
+                            for (int j = 0; j < topSide.Count + 1; j++)
                             {
                                 UVLattice[i, j].UV += new PEPlugin.SDX.V2(trans, 0);
                             }
                         }
                         break;
                     case 2:
-                        for (int i = 0; i < leftSide.Count; i++)
+                        for (int i = 0; i < leftSide.Count + 1; i++)
                         {
                             var trans = maxLength - HLength[i];
-                            for (int j = 0; j < topSide.Count; j++)
+                            for (int j = 0; j < topSide.Count + 1; j++)
                             {
                                 UVLattice[i, j].UV += new PEPlugin.SDX.V2(trans, 0);
                             }
@@ -351,20 +378,20 @@ namespace AlignUVLattice
                 switch (alV)
                 {
                     case 1:
-                        for (int i = 0; i < topSide.Count; i++)
+                        for (int i = 0; i < topSide.Count + 1; i++)
                         {
                             var trans = (maxLength - VLength[i]) / 2;
-                            for (int j = 0; j < leftSide.Count; j++)
+                            for (int j = 0; j < leftSide.Count + 1; j++)
                             {
                                 UVLattice[j, i].UV += new PEPlugin.SDX.V2(0, trans);
                             }
                         }
                         break;
                     case 2:
-                        for (int i = 0; i < topSide.Count; i++)
+                        for (int i = 0; i < topSide.Count + 1; i++)
                         {
                             var trans = maxLength - VLength[i];
-                            for (int j = 0; j < leftSide.Count; j++)
+                            for (int j = 0; j < leftSide.Count + 1; j++)
                             {
                                 UVLattice[j, i].UV += new PEPlugin.SDX.V2(0, trans);
                             }
@@ -375,13 +402,15 @@ namespace AlignUVLattice
                 }
             }
 
-            for (int i = 0; i < leftSide.Count; i++)
+            for (int i = 0; i < leftSide.Count + 1; i++)
             {
-                for (int j = 0; j < topSide.Count; j++)
+                for (int j = 0; j < topSide.Count + 1; j++)
                 {
                     pmx.Vertex[UVLatticeID[i, j]] = UVLattice[i, j];
                 }
             }
+
+
             Methods.Update(args.Host.Connector, pmx, PmxUpdateObject.Vertex);
         }
 
@@ -389,7 +418,7 @@ namespace AlignUVLattice
         private void SetLatticeExistance(bool value)
         {
             existLattice = value;
-            textBoxMakeLattice.Text = value ? "格子生成済み" : "格子未生成";
+            textBoxMakeLattice.Text = value ? "格子生成済" : "格子未生成";
         }
 
         /// <summary>
@@ -445,6 +474,24 @@ namespace AlignUVLattice
                 }
             }
             return source[nearestID];
+        }
+
+        private void buttonReset_Click(object sender, EventArgs e)
+        {
+            pmx = args.Host.Connector.Pmx.GetCurrentState();
+            origin = null;
+            topSide = null;
+            leftSide = null;
+            targetVertices = null;
+
+            UVLattice = null;
+            UVLatticeID = null;
+
+            textBoxOrigin.Text = "";
+            textBoxTopSide.Text = "";
+            textBoxLeftSide.Text = "";
+            textBoxTarget.Text = "";
+            SetLatticeExistance(false);
         }
     }
 }

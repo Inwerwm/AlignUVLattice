@@ -62,6 +62,7 @@
             this.labelVIsolength = new System.Windows.Forms.Label();
             this.labelSettings = new System.Windows.Forms.Label();
             this.labelSetDesc = new System.Windows.Forms.Label();
+            this.buttonReset = new System.Windows.Forms.Button();
             this.tableLayoutPanelButton.SuspendLayout();
             this.tableLayoutPanelNum.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
@@ -84,7 +85,7 @@
             // buttonTopSide
             // 
             this.buttonTopSide.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.buttonTopSide.Location = new System.Drawing.Point(113, 7);
+            this.buttonTopSide.Location = new System.Drawing.Point(115, 7);
             this.buttonTopSide.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.buttonTopSide.Name = "buttonTopSide";
             this.buttonTopSide.Size = new System.Drawing.Size(310, 28);
@@ -114,17 +115,17 @@
             this.tableLayoutPanelButton.Controls.Add(this.buttonTopSide, 1, 0);
             this.tableLayoutPanelButton.Controls.Add(this.buttonLeftSide, 0, 1);
             this.tableLayoutPanelButton.Controls.Add(this.buttonTarget, 1, 1);
-            this.tableLayoutPanelButton.Location = new System.Drawing.Point(20, 112);
+            this.tableLayoutPanelButton.Location = new System.Drawing.Point(16, 112);
             this.tableLayoutPanelButton.Name = "tableLayoutPanelButton";
             this.tableLayoutPanelButton.RowCount = 2;
             this.tableLayoutPanelButton.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.tableLayoutPanelButton.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 75F));
-            this.tableLayoutPanelButton.Size = new System.Drawing.Size(429, 161);
+            this.tableLayoutPanelButton.Size = new System.Drawing.Size(433, 161);
             this.tableLayoutPanelButton.TabIndex = 1;
             // 
             // buttonTarget
             // 
-            this.buttonTarget.Location = new System.Drawing.Point(113, 47);
+            this.buttonTarget.Location = new System.Drawing.Point(114, 47);
             this.buttonTarget.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.buttonTarget.Name = "buttonTarget";
             this.buttonTarget.Size = new System.Drawing.Size(310, 107);
@@ -217,9 +218,9 @@
             // 
             // buttonMakeLattice
             // 
-            this.buttonMakeLattice.Location = new System.Drawing.Point(20, 292);
+            this.buttonMakeLattice.Location = new System.Drawing.Point(16, 279);
             this.buttonMakeLattice.Name = "buttonMakeLattice";
-            this.buttonMakeLattice.Size = new System.Drawing.Size(429, 27);
+            this.buttonMakeLattice.Size = new System.Drawing.Size(433, 27);
             this.buttonMakeLattice.TabIndex = 3;
             this.buttonMakeLattice.Text = "格子を生成";
             this.buttonMakeLattice.UseVisualStyleBackColor = true;
@@ -227,12 +228,13 @@
             // 
             // textBoxMakeLattice
             // 
-            this.textBoxMakeLattice.Location = new System.Drawing.Point(477, 292);
+            this.textBoxMakeLattice.Location = new System.Drawing.Point(477, 279);
             this.textBoxMakeLattice.Name = "textBoxMakeLattice";
             this.textBoxMakeLattice.ReadOnly = true;
             this.textBoxMakeLattice.Size = new System.Drawing.Size(433, 27);
             this.textBoxMakeLattice.TabIndex = 1;
             this.textBoxMakeLattice.Text = "格子未生成";
+            this.textBoxMakeLattice.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // tableLayoutPanel3
             // 
@@ -251,7 +253,7 @@
             this.tableLayoutPanel3.Controls.Add(this.radioButtonBC, 1, 2);
             this.tableLayoutPanel3.Controls.Add(this.radioButtonCL, 0, 1);
             this.tableLayoutPanel3.Controls.Add(this.radioButtonBL, 0, 2);
-            this.tableLayoutPanel3.Location = new System.Drawing.Point(112, 45);
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(114, 45);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 3;
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33F));
@@ -364,9 +366,9 @@
             // buttonAlign
             // 
             this.buttonAlign.Font = new System.Drawing.Font("Yu Gothic UI", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.buttonAlign.Location = new System.Drawing.Point(20, 567);
+            this.buttonAlign.Location = new System.Drawing.Point(16, 479);
             this.buttonAlign.Name = "buttonAlign";
-            this.buttonAlign.Size = new System.Drawing.Size(890, 89);
+            this.buttonAlign.Size = new System.Drawing.Size(433, 89);
             this.buttonAlign.TabIndex = 3;
             this.buttonAlign.Text = "整列を実行";
             this.buttonAlign.UseVisualStyleBackColor = true;
@@ -376,7 +378,7 @@
             // 
             this.checkBoxHIsolength.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.checkBoxHIsolength.AutoSize = true;
-            this.checkBoxHIsolength.Location = new System.Drawing.Point(203, 9);
+            this.checkBoxHIsolength.Location = new System.Drawing.Point(206, 9);
             this.checkBoxHIsolength.Name = "checkBoxHIsolength";
             this.checkBoxHIsolength.Size = new System.Drawing.Size(129, 24);
             this.checkBoxHIsolength.TabIndex = 8;
@@ -387,7 +389,7 @@
             // 
             this.checkBoxVIsolength.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.checkBoxVIsolength.AutoSize = true;
-            this.checkBoxVIsolength.Location = new System.Drawing.Point(21, 68);
+            this.checkBoxVIsolength.Location = new System.Drawing.Point(22, 68);
             this.checkBoxVIsolength.Name = "checkBoxVIsolength";
             this.checkBoxVIsolength.Size = new System.Drawing.Size(66, 64);
             this.checkBoxVIsolength.TabIndex = 8;
@@ -405,12 +407,12 @@
             this.tableLayoutPanelSettings.Controls.Add(this.checkBoxVIsolength, 0, 1);
             this.tableLayoutPanelSettings.Controls.Add(this.tableLayoutPanel3, 1, 1);
             this.tableLayoutPanelSettings.Controls.Add(this.labelSettings, 0, 0);
-            this.tableLayoutPanelSettings.Location = new System.Drawing.Point(20, 366);
+            this.tableLayoutPanelSettings.Location = new System.Drawing.Point(16, 312);
             this.tableLayoutPanelSettings.Name = "tableLayoutPanelSettings";
             this.tableLayoutPanelSettings.RowCount = 2;
             this.tableLayoutPanelSettings.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.tableLayoutPanelSettings.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 75F));
-            this.tableLayoutPanelSettings.Size = new System.Drawing.Size(429, 161);
+            this.tableLayoutPanelSettings.Size = new System.Drawing.Size(433, 161);
             this.tableLayoutPanelSettings.TabIndex = 1;
             // 
             // labelalign
@@ -434,7 +436,7 @@
             this.tableLayoutPanelSetDesc.Controls.Add(this.labelHIsolength, 1, 0);
             this.tableLayoutPanelSetDesc.Controls.Add(this.labelVIsolength, 0, 1);
             this.tableLayoutPanelSetDesc.Controls.Add(this.labelSetDesc, 0, 0);
-            this.tableLayoutPanelSetDesc.Location = new System.Drawing.Point(477, 366);
+            this.tableLayoutPanelSetDesc.Location = new System.Drawing.Point(477, 312);
             this.tableLayoutPanelSetDesc.Name = "tableLayoutPanelSetDesc";
             this.tableLayoutPanelSetDesc.RowCount = 2;
             this.tableLayoutPanelSetDesc.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
@@ -482,11 +484,23 @@
             this.labelSetDesc.TabIndex = 9;
             this.labelSetDesc.Text = "設定概要";
             // 
+            // buttonReset
+            // 
+            this.buttonReset.Font = new System.Drawing.Font("Yu Gothic UI", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.buttonReset.Location = new System.Drawing.Point(477, 479);
+            this.buttonReset.Name = "buttonReset";
+            this.buttonReset.Size = new System.Drawing.Size(433, 89);
+            this.buttonReset.TabIndex = 3;
+            this.buttonReset.Text = "初期化";
+            this.buttonReset.UseVisualStyleBackColor = true;
+            this.buttonReset.Click += new System.EventHandler(this.buttonReset_Click);
+            // 
             // CtrlForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(933, 673);
+            this.ClientSize = new System.Drawing.Size(933, 574);
+            this.Controls.Add(this.buttonReset);
             this.Controls.Add(this.buttonAlign);
             this.Controls.Add(this.buttonMakeLattice);
             this.Controls.Add(this.textBoxMakeLattice);
@@ -551,5 +565,6 @@
         private System.Windows.Forms.Label labelVIsolength;
         private System.Windows.Forms.Label labelSettings;
         private System.Windows.Forms.Label labelSetDesc;
+        private System.Windows.Forms.Button buttonReset;
     }
 }
