@@ -16,7 +16,7 @@ namespace AlignUVLattice
         {
             get
             {
-                return "プラグイン名";
+                return "UV格子の整列";
             }
         }
 
@@ -32,7 +32,7 @@ namespace AlignUVLattice
         {
             get
             {
-                return "プラグイン説明";
+                return "格子状のUVを整列する";
             }
         }
 
@@ -41,7 +41,7 @@ namespace AlignUVLattice
             get
             {
                 // boot時実行, プラグインメニューへの登録, メニュー登録名
-                return new PEPluginOption(false, true, "プラグイン名");
+                return new PEPluginOption(false, true, "UV格子の整列");
             }
         }
 
