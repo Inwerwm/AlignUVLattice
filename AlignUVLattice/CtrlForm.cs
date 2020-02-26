@@ -1,5 +1,6 @@
 ﻿using PEPlugin;
 using PEPlugin.Pmx;
+using PEPlugin.SDX;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -253,78 +254,76 @@ namespace AlignUVLattice
             //UV座標における辺の総距離を求める
             //0列目の点を基準に横方向に総距離の長さの線分を比率に沿って分割する
             //0行目であった場合、等長ならこの総距離の長さを全ての行の長さにする、比率なら基準にして他の行では長さの比率で距離を決める
-            float basisSideLength = 0;
-            var HLength = new float[leftSide.Count + 1];
-            var VLength = new float[topSide.Count + 1];
 
-            for (int i = 0; i < leftSide.Count + 1; i++)
+            //各行各列の距離
+            var HLength = new List<float>(leftSide.Count + 1);
+            var VLength = new List<float>(topSide.Count + 1);
+            var latticeDistance = new V2[leftSide.Count + 1, topSide.Count + 1];
+            for (int i = 0; i <= leftSide.Count; i++)
             {
-                float UVsideLength = 0;
-                float XYZsideLength = 0;
-                for (int j = 1; j < topSide.Count + 1; j++)
+                HLength.Add(0);
+                for (int j = 0; j <= topSide.Count; j++)
                 {
-                    //UV座標における辺の総距離を求める
-                    UVsideLength += (UVLattice[i, j - 1].UV - UVLattice[i, j].UV).Length();
-                    //位置座標における辺の総距離を求める
-                    XYZsideLength += (UVLattice[i, j - 1].Position - UVLattice[i, j].Position).Length();
-                }
+                    latticeDistance[i, j] = new V2(0, 0);
+                    if (i == 0)
+                        VLength.Add(0);
 
-                if (i == 0)
-                {
-                    //0行目のUV辺総距離を基準長として保存
-                    basisSideLength = UVsideLength;
+                    if (j > 0)
+                    {
+                        var hl = (UVLattice[i, j].Position - UVLattice[i, j - 1].Position).Length();
+                        HLength[i] += hl;
+                        latticeDistance[i, j].U = hl;
+                    }
+                    if (i > 0)
+                    {
+                        var vl = (UVLattice[i, j].Position - UVLattice[i - 1, j].Position).Length();
+                        VLength[j] += vl;
+                        latticeDistance[i, j].V = vl;
+                    }
                 }
-                else
-                {
-                    //0列目のU座標を0行0列目の点と合わせる
-                    UVLattice[i, 0].UV.U = UVLattice[0, 0].UV.U;
-                }
-
-                for (int j = 1; j < topSide.Count + 1; j++)
-                {
-                    //横方向に総距離の長さの線分を比率に沿って分割する
-                    var ratio = (UVLattice[i, j - 1].Position - UVLattice[i, j].Position).Length() / XYZsideLength;
-                    UVLattice[i, j].UV.U = UVLattice[i, j - 1].UV.U + (checkBoxHIsolength.Checked ? basisSideLength : UVsideLength) * ratio;
-                }
-
-                HLength[i] = UVsideLength;
             }
 
-            //列についても同様にする
-            for (int i = 0; i < topSide.Count + 1; i++)
+            //基準長
+            var basisPointStart = new V2(0, 0);
+            var basisPointEnd = new V2(1, 1);
+            var HMax = HLength.Max();
+            var VMax = VLength.Max();
+
+            //分配
+            //(0,0)～(1,1)であることが前提の実装
+            //(basisPointEnd × 比率)がそのまま使えるのは起点が原点(0,0)である場合のみ
+            for (int i = 0; i <= leftSide.Count; i++)
             {
-                float UVsideLength = 0;
-                float XYZsideLength = 0;
-                for (int j = 1; j < leftSide.Count + 1; j++)
+                for (int j = 0; j <= topSide.Count; j++)
                 {
-                    //UV座標における辺の総距離を求める
-                    UVsideLength += (UVLattice[j - 1, i].UV - UVLattice[j, i].UV).Length();
-                    //位置座標における辺の総距離を求める
-                    XYZsideLength += (UVLattice[j - 1, i].Position - UVLattice[j, i].Position).Length();
-                }
+                    if (!checkBoxHIsolength.Checked)
+                    {
+                        //水平方向が等長でない場合
+                        basisPointEnd.U = HLength[i] / HMax;
+                    }
+                    if (!checkBoxVIsolength.Checked)
+                    {
+                        //垂直方向が等長でない場合
+                        basisPointEnd.V = VLength[i] / VMax;
+                    }
 
-                if (i == 0)
-                {
-                    //0列目のUV辺総距離を基準長として保存
-                    basisSideLength = UVsideLength;
-                }
-                else
-                {
-                    //0行目のV座標を0行0列目の点と合わせる
-                    UVLattice[0, i].UV.V = UVLattice[0, 0].UV.V;
-                }
+                    //水平整列
+                    if (j == 0)
+                        UVLattice[i, j].UV.U = basisPointStart.U;
+                    else
+                        UVLattice[i, j].UV.U = UVLattice[i, j - 1].UV.U + basisPointEnd.U * latticeDistance[i, j].U / HLength[i];
 
-                for (int j = 1; j < leftSide.Count + 1; j++)
-                {
-                    //縦方向に総距離の長さの線分を比率に沿って分割する
-                    var ratio = (UVLattice[j - 1, i].Position - UVLattice[j, i].Position).Length() / XYZsideLength;
-                    UVLattice[j, i].UV.V = UVLattice[j - 1, i].UV.V + (checkBoxVIsolength.Checked ? basisSideLength : UVsideLength) * ratio;
+                    //垂直整列
+                    if (i == 0)
+                        UVLattice[i, j].UV.V = basisPointStart.V;
+                    else
+                        UVLattice[i, j].UV.V = UVLattice[i - 1, j].UV.V + basisPointEnd.V * latticeDistance[i, j].V / VLength[j];
                 }
-                VLength[i] = UVsideLength;
             }
 
             //整列処理
             //ラジオボタンの結果を方向に分解
+            /*
             byte alH = 0;//0:左 1:中 2:右
             if (radioButtonBL.Checked || radioButtonCL.Checked || radioButtonTL.Checked)
                 alH = 0;
@@ -401,6 +400,7 @@ namespace AlignUVLattice
                         break;
                 }
             }
+            */
 
             for (int i = 0; i < leftSide.Count + 1; i++)
             {
@@ -409,7 +409,6 @@ namespace AlignUVLattice
                     pmx.Vertex[UVLatticeID[i, j]] = UVLattice[i, j];
                 }
             }
-
 
             Methods.Update(args.Host.Connector, pmx, PmxUpdateObject.Vertex);
         }
